@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Focus Timer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- 時間設定 -->
+        <div class="time-pickers">
+            <select id="hours"></select> <span>h</span>
+            <select id="minutes"></select> <span>m</span>
+            <select id="seconds"></select> <span>s</span>
+        </div>
+
+        <!-- 音楽選択（表示は大文字始まり、valueはファイル名と一致させる） -->
+        <select id="music">
+            <option value="mountain">Mountain</option>
+            <option value="fire">Fire</option>
+            <option value="sea">Sea</option>
+            <option value="none">None</option>
+        </select>
+
+        <!-- タイマー開始ボタン -->
+        <button id="start-btn">START TIMER</button>
+    </div>
+
+    <!-- 暗転用オーバーレイ -->
+    <div id="overlay" class="hidden">
+        <p id="focus-text">STAY FOCUSED.</p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
