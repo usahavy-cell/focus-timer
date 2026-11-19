@@ -25,7 +25,7 @@ secondsSelect.value = 0;
 function getTotalSeconds() {
     return (parseInt(hoursSelect.value) * 3600) + 
            (parseInt(minutesSelect.value) * 60) + 
-           parseInt(secondsSelect.value);
+            parseInt(secondsSelect.value);
 }
 
 function updateStartButton() {
@@ -44,7 +44,7 @@ startBtn.addEventListener('click', async () => {
 
     isRunning = true;
     let elapsedSeconds = 0;
-    let dotCount = 1;
+    let dotCount = 0;
 
     // 初期表示をリセット
     focusText.textContent = "STAY FOCUSED.";
@@ -79,8 +79,8 @@ startBtn.addEventListener('click', async () => {
             return;
         }
 
-        // ドットを 1 -> 2 -> 3 -> 1 と循環させる
-        dotCount = (dotCount % 3) + 1;
+        // ドットを 0 -> 1 -> 2 -> 3 -> 0 と循環させる
+        dotCount = (elapsedSeconds % 4);
         focusText.textContent = "STAY FOCUSED" + ".".repeat(dotCount);
     }, 1000);
 });

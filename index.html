@@ -1,44 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Focus Timer</title>
-    <!-- 1. Bootstrapを先に読み込む -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
-    <!-- 2. 自作CSSはあとに書く（上書きできるようにするため） -->
-    <link rel="stylesheet" href="style.css">
-</head>
-<body class="d-flex justify-content-center align-items-center vh-100">
-    <div class="container text-center" style="max-width: 340px;">
-        
-        <!-- 時間設定：align-items-center で h/m/s を上下中央に揃え、gap-2 で程よい隙間を空ける -->
-        <div class="d-flex align-items-center gap-2 mb-3">
-            <select id="hours" class="form-select"></select>
-            <span>h</span>
-            <select id="minutes" class="form-select"></select>
-            <span>m</span>
-            <select id="seconds" class="form-select"></select>
-            <span>s</span>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Focus Timer</title>
+        <!-- 1. Bootstrapを先に読み込む -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+        <!-- 2. 自作CSSはあとに書く（上書きできるようにするため） -->
+        <link rel="stylesheet" href="/libs/css/style.css">
+        <link rel="stylesheet" href="style.css">
+    </head>
+    <body>
+        <!--#include virtual="/libs/include/header.html" -->
+        <div class="d-flex justify-content-center align-items-center">
+            <div class="container text-center" style="max-width: 340px;">
+                
+                <!-- 時間設定：align-items-center で h/m/s を上下中央に揃え、gap-2 で程よい隙間を空ける -->
+                <div class="d-flex align-items-center gap-2 mb-3">
+                    <select id="hours" class="form-select"></select>
+                    <span>h</span>
+                    <select id="minutes" class="form-select"></select>
+                    <span>m</span>
+                    <select id="seconds" class="form-select"></select>
+                    <span>s</span>
+                </div>
+
+                <!-- 音楽選択：mb-4 でボタンとの間にしっかり余白を空ける -->
+                <select id="music" class="form-select mb-4">
+                    <option value="mountain">Mountain</option>
+                    <option value="fire">Fire</option>
+                    <option value="sea">Sea</option>
+                    <option value="none">None</option>
+                </select>
+
+                <!-- タイマー開始ボタン：w-100 で上のプルダウンと横幅をピシッと揃える -->
+                <button id="start-btn" class="btn btn-primary w-100 py-2">START TIMER</button>
+            </div>
+
+            <!-- 暗転用オーバーレイ -->
+            <div id="overlay" class="hidden">
+                <p id="focus-text">STAY FOCUSED</p>
+            </div>
+
+            <script src="script.js"></script>
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" integrity="sha384-FKyoEForCGlyvwx9Hj09JcYn3nv7wiPVlz7YYwJrWVcXK/BmnVDxM+D2scQbITxI" crossorigin="anonymous"></script>
         </div>
-
-        <!-- 音楽選択：mb-4 でボタンとの間にしっかり余白を空ける -->
-        <select id="music" class="form-select mb-4">
-            <option value="mountain">Mountain</option>
-            <option value="fire">Fire</option>
-            <option value="sea">Sea</option>
-            <option value="none">None</option>
-        </select>
-
-        <!-- タイマー開始ボタン：w-100 で上のプルダウンと横幅をピシッと揃える -->
-        <button id="start-btn" class="btn btn-primary w-100 py-2">START TIMER</button>
-    </div>
-
-    <!-- 暗転用オーバーレイ -->
-    <div id="overlay" class="hidden">
-        <p id="focus-text">STAY FOCUSED.</p>
-    </div>
-
-    <script src="script.js"></script>
-</body>
+        <!--#include virtual="/libs/include/footer.html" -->
+    </body>
 </html>
