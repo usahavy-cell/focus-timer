@@ -105,7 +105,7 @@ startBtn.addEventListener('click', async () => {
             setTimeout(() => {
                 alert("Great job! You stayed focused the entire time.");
                 updateStartButton(); // ここでようやく次のタイマーが押せるようになる
-            }, 2500); // ※success.mp3の長さに合わせて 2000 を 1500 や 3000 に変えてください
+            }, 2100); // ※success.mp3の長さに合わせて 2000 を 1500 や 3000 に変えてください
             
             return;
         }
