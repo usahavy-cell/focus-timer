@@ -12,8 +12,8 @@ let isRunning = false;
 let timerInterval = null;
 let audioPlayer = null;
 let wakeLock = null;
+let isAudioUnlocked = false; // ★追加：初回だけロック解除するためのマーク
 
-// ★あらかじめ成功音を準備しておく（毎回作らない）
 const successSound = new Audio("sounds/success.mp3");
 
 // --- 初期設定 ---
@@ -32,7 +32,6 @@ function getTotalSeconds() {
 }
 
 function updateStartButton() {
-    // 実行中でない時だけボタンの有効/無効を切り替える
     if (!isRunning) {
         startBtn.disabled = getTotalSeconds() === 0;
     }
@@ -45,14 +44,13 @@ updateStartButton();
 
 // --- メイン処理（タイマー開始） ---
 startBtn.addEventListener('click', async () => {
-    // ★修正1：ボタンの連打・二重起動を完全にブロック
     if (isRunning) return;
 
     const totalTime = getTotalSeconds();
     if (totalTime === 0) return;
 
     isRunning = true;
-    startBtn.disabled = true; // 実行中はスタートボタンを押せなくする
+    startBtn.disabled = true; // タイマー実行中はボタンを封印
     let elapsedSeconds = 0;
     let dotCount = 0;
 
@@ -67,13 +65,16 @@ startBtn.addEventListener('click', async () => {
         console.log("Wake Lock error:", err);
     }
 
-    // ★修正2：ボタンを押した瞬間に一瞬だけ無音再生し、ブラウザの「自動再生ブロック」を解除
-    successSound.volume = 0;
-    successSound.play().then(() => {
-        successSound.pause();
-        successSound.currentTime = 0;
-        successSound.volume = 1;
-    }).catch(e => console.log("Unlock error:", e));
+    // ★修正ポイント：音の再生許可を「初回の1回だけ」取る
+    if (!isAudioUnlocked) {
+        successSound.volume = 0;
+        successSound.play().then(() => {
+            successSound.pause();
+            successSound.currentTime = 0;
+            successSound.volume = 1;
+            isAudioUnlocked = true; // 「もう解除したよ」というマークをつける
+        }).catch(e => console.log("Unlock error:", e));
+    }
 
     // BGM再生
     const selectedMusic = musicSelect.value;
@@ -92,18 +93,19 @@ startBtn.addEventListener('click', async () => {
 
         // 指定時間に達したらクリア
         if (elapsedSeconds >= totalTime) {
-            // 1. 先にBGMと暗転を完全に止める
             stopTimerOnly();
+            
+            // ★アラートが出るまでスタートボタンをずっと封印しておく
+            startBtn.disabled = true; 
 
-            // 2. 成功音を鳴らす
             successSound.currentTime = 0;
             successSound.play().catch(e => console.log("Success play error:", e));
             
-            // 3. 音が鳴り終わる頃（例: 2000ミリ秒 = 2秒後）に、強制的にアラートを出す
-            // ※ お使いの success.mp3 の長さに合わせて、ここの数字(2000)を調整してください。
+            // ★約2秒待ってからアラートを出し、OKを押したらボタンを復活させる
             setTimeout(() => {
                 alert("Great job! You stayed focused the entire time.");
-            }, 2000); 
+                updateStartButton(); // ここでようやく次のタイマーが押せるようになる
+            }, 2500); // ※success.mp3の長さに合わせて 2000 を 1500 や 3000 に変えてください
             
             return;
         }
@@ -118,8 +120,12 @@ startBtn.addEventListener('click', async () => {
 document.addEventListener('visibilitychange', () => {
     if (document.hidden && isRunning) {
         stopTimerOnly();
+        
+        startBtn.disabled = true; // アラートが出るまでボタン封印
+        
         setTimeout(() => {
             alert("Session failed. You left the app during focus time.");
+            updateStartButton(); // OKを押したら復活
         }, 50);
     }
 });
@@ -129,8 +135,6 @@ function stopTimerOnly() {
     isRunning = false;
     clearInterval(timerInterval);
     
-    updateStartButton(); // ストップしたら再びボタンを押せるように戻す
-
     if (audioPlayer) {
         audioPlayer.pause();
         audioPlayer.currentTime = 0;
