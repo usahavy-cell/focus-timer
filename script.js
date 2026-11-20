@@ -78,7 +78,7 @@ startBtn.addEventListener('click', async () => {
             finishTimer("Great job! You stayed focused the entire time.");
 
             // 成功音を鳴らす
-            audioPlayer = new Audio(`sounds/success.mp3`);
+            audioPlayer = new Audio("sounds/success.mp3");
             audioPlayer.loop = false;
             audioPlayer.play().catch(e => console.log("Audio play error:", e));
             return;
