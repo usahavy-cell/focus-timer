@@ -8,13 +8,16 @@ const overlay = document.getElementById('overlay');
 const focusText = document.getElementById('focus-text');
 
 // --- 状態管理 ---
-let isRunning = false;
+let isRunning = false;   // タイマー進行中か（タブ移動ペナルティの判定用）
+let isAppLocked = false; // 画面ロック中か（連打や魔の2秒間の誤操作防止用）
 let timerInterval = null;
 let audioPlayer = null;
 let wakeLock = null;
-let isAudioUnlocked = false; // ★追加：初回だけロック解除するためのマーク
+let isAudioUnlocked = false;
 
+// 成功音を裏でスタンバイさせておく
 const successSound = new Audio("sounds/success.mp3");
+successSound.preload = "auto"; 
 
 // --- 初期設定 ---
 for (let i = 0; i <= 23; i++) hoursSelect.add(new Option(i, i));
@@ -32,7 +35,8 @@ function getTotalSeconds() {
 }
 
 function updateStartButton() {
-    if (!isRunning) {
+    // 画面がロックされていない時だけ、ボタンの有効/無効を判定する
+    if (!isAppLocked) {
         startBtn.disabled = getTotalSeconds() === 0;
     }
 }
@@ -44,16 +48,18 @@ updateStartButton();
 
 // --- メイン処理（タイマー開始） ---
 startBtn.addEventListener('click', async () => {
-    if (isRunning) return;
+    if (isAppLocked) return; // アラートを閉じるまでは何度ボタンを押しても無視する
 
     const totalTime = getTotalSeconds();
     if (totalTime === 0) return;
 
-    isRunning = true;
-    startBtn.disabled = true; // タイマー実行中はボタンを封印
+    // ★ 状態をオンにする
+    isAppLocked = true; // ここから完全ロック開始
+    isRunning = true;   // ここからペナルティ監視開始
+    startBtn.disabled = true;
+    
     let elapsedSeconds = 0;
     let dotCount = 0;
-
     focusText.textContent = "STAY FOCUSED.";
 
     // スリープ防止
@@ -65,15 +71,10 @@ startBtn.addEventListener('click', async () => {
         console.log("Wake Lock error:", err);
     }
 
-    // ★修正ポイント：音の再生許可を「初回の1回だけ」取る
+    // 音声のロック解除（初回のみ）
     if (!isAudioUnlocked) {
-        successSound.volume = 0;
-        successSound.play().then(() => {
-            successSound.pause();
-            successSound.currentTime = 0;
-            successSound.volume = 1;
-            isAudioUnlocked = true; // 「もう解除したよ」というマークをつける
-        }).catch(e => console.log("Unlock error:", e));
+        successSound.load();
+        isAudioUnlocked = true;
     }
 
     // BGM再生
@@ -93,24 +94,22 @@ startBtn.addEventListener('click', async () => {
 
         // 指定時間に達したらクリア
         if (elapsedSeconds >= totalTime) {
+            isRunning = false; // ★集中完了！ここからはタブを移動しても怒られない
             stopTimerOnly();
-            
-            // ★アラートが出るまでスタートボタンをずっと封印しておく
-            startBtn.disabled = true; 
 
             successSound.currentTime = 0;
             successSound.play().catch(e => console.log("Success play error:", e));
             
-            // ★約2秒待ってからアラートを出し、OKを押したらボタンを復活させる
+            // 約2秒待ってからアラートを出す
             setTimeout(() => {
                 alert("Great job! You stayed focused the entire time.");
-                updateStartButton(); // ここでようやく次のタイマーが押せるようになる
-            }, 2100); // ※success.mp3の長さに合わせて 2000 を 1500 や 3000 に変えてください
+                isAppLocked = false; // ★アラートの「OK」を押して、初めてロック解除
+                updateStartButton();
+            }, 2000); // ※success.mp3の長さに合わせて数字を微調整してください
             
             return;
         }
 
-        // ドットを 0 -> 1 -> 2 -> 3 -> 0 と循環させる
         dotCount = (elapsedSeconds % 4);
         focusText.textContent = "STAY FOCUSED" + ".".repeat(dotCount);
     }, 1000);
@@ -118,21 +117,21 @@ startBtn.addEventListener('click', async () => {
 
 // --- ペナルティ処理 ---
 document.addEventListener('visibilitychange', () => {
+    // 集中期間中（isRunning）にタブを隠したらアウト
     if (document.hidden && isRunning) {
+        isRunning = false; 
         stopTimerOnly();
-        
-        startBtn.disabled = true; // アラートが出るまでボタン封印
         
         setTimeout(() => {
             alert("Session failed. You left the app during focus time.");
-            updateStartButton(); // OKを押したら復活
+            isAppLocked = false; // ★ペナルティのOKを押してロック解除
+            updateStartButton();
         }, 50);
     }
 });
 
-// --- 共通停止処理（画面とBGMを止めるだけ） ---
+// --- 共通停止処理 ---
 function stopTimerOnly() {
-    isRunning = false;
     clearInterval(timerInterval);
     
     if (audioPlayer) {
