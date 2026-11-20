@@ -40,6 +40,7 @@ updateStartButton();
 // --- メイン処理（タイマー開始） ---
 startBtn.addEventListener('click', async () => {
     const totalTime = getTotalSeconds();
+    const successSound = new Audio("sounds/success.mp3");
     if (totalTime === 0) return;
 
     isRunning = true;
@@ -76,9 +77,7 @@ startBtn.addEventListener('click', async () => {
         // 指定時間に達したらクリア
         if (elapsedSeconds >= totalTime) {
             // 成功音を鳴らす
-            audioPlayer = new Audio("sounds/success.mp3");
-            audioPlayer.loop = false;
-            audioPlayer.play().catch(e => console.log("Audio play error:", e));
+            successSound.play().catch(e => console.log("Audio play error:", e));
             
             finishTimer("Great job! You stayed focused the entire time.");
             return;
