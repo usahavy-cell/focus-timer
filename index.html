@@ -17,6 +17,7 @@
                 
                 <!-- 時間設定：align-items-center で h/m/s を上下中央に揃え、gap-2 で程よい隙間を空ける -->
                 <div class="d-flex align-items-center gap-2 mb-3">
+                    <span>Time:</span>
                     <select id="hours" class="form-select"></select>
                     <span>h</span>
                     <select id="minutes" class="form-select"></select>
@@ -26,12 +27,15 @@
                 </div>
 
                 <!-- 音楽選択：mb-4 でボタンとの間にしっかり余白を空ける -->
-                <select id="music" class="form-select mb-4">
-                    <option value="mountain">Mountain</option>
-                    <option value="fire">Fire</option>
-                    <option value="sea">Sea</option>
-                    <option value="none">None</option>
-                </select>
+                <div class="d-flex align-items-center mb-4 gap-2">
+                    <span>Music:</span>
+                    <select id="music" class="form-select">
+                        <option value="mountain">Mountain</option>
+                        <option value="fire">Fire</option>
+                        <option value="sea">Sea</option>
+                        <option value="none">None</option>
+                    </select>
+                </div>
 
                 <!-- タイマー開始ボタン：w-100 で上のプルダウンと横幅をピシッと揃える -->
                 <button id="start-btn" class="btn btn-primary w-100 py-2">START TIMER</button>
