@@ -95,18 +95,15 @@ startBtn.addEventListener('click', async () => {
             // 1. 先にBGMと暗転を完全に止める
             stopTimerOnly();
 
-            // 2. 鳴り終わったあとの「アラート」を先に予約しておく
-            successSound.onended = () => {
-                alert("Great job! You stayed focused the entire time.");
-            };
-
-            // 3. 成功音を鳴らす
+            // 2. 成功音を鳴らす
             successSound.currentTime = 0;
-            successSound.play().catch(e => {
-                // 万が一音が鳴らない環境でも、ここで確実にアラートを出す
-                console.log("Success play error:", e);
+            successSound.play().catch(e => console.log("Success play error:", e));
+            
+            // 3. 音が鳴り終わる頃（例: 2000ミリ秒 = 2秒後）に、強制的にアラートを出す
+            // ※ お使いの success.mp3 の長さに合わせて、ここの数字(2000)を調整してください。
+            setTimeout(() => {
                 alert("Great job! You stayed focused the entire time.");
-            });
+            }, 2000); 
             
             return;
         }
