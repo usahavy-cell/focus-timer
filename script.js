@@ -40,14 +40,14 @@ updateStartButton();
 // --- メイン処理（タイマー開始） ---
 startBtn.addEventListener('click', async () => {
     const totalTime = getTotalSeconds();
-    const successSound = new Audio("sounds/success.mp3");
     if (totalTime === 0) return;
+
+    const successSound = new Audio("sounds/success.mp3");
 
     isRunning = true;
     let elapsedSeconds = 0;
     let dotCount = 0;
 
-    // 初期表示をリセット
     focusText.textContent = "STAY FOCUSED.";
 
     // スリープ防止
@@ -58,6 +58,14 @@ startBtn.addEventListener('click', async () => {
     } catch (err) {
         console.log("Wake Lock error:", err);
     }
+
+    // 【重要】ボタンを押した瞬間に、無音で一瞬だけ再生してブラウザの自動再生ロックを解除する
+    successSound.volume = 0;
+    successSound.play().then(() => {
+        successSound.pause();
+        successSound.currentTime = 0;
+        successSound.volume = 1;
+    }).catch(e => console.log("Success unlock error:", e));
 
     // soundsフォルダから音楽を再生
     const selectedMusic = musicSelect.value;
@@ -76,10 +84,19 @@ startBtn.addEventListener('click', async () => {
 
         // 指定時間に達したらクリア
         if (elapsedSeconds >= totalTime) {
-            // 成功音を鳴らす
-            successSound.play().catch(e => console.log("Audio play error:", e));
-            
-            finishTimer("Great job! You stayed focused the entire time.");
+            // 1. 先にBGMと暗転だけを止める（アラートはまだ出さない）
+            stopTimerOnly();
+
+            // 2. 成功音を鳴らす
+            successSound.play().then(() => {
+                // 3. 音が鳴り終わった瞬間にアラートを出す
+                successSound.onended = () => {
+                    alert("Great job! You stayed focused the entire time.");
+                };
+            }).catch(e => {
+                console.log("Success play error:", e);
+                alert("Great job! You stayed focused the entire time.");
+            });
             return;
         }
 
@@ -92,12 +109,15 @@ startBtn.addEventListener('click', async () => {
 // --- ペナルティ処理 ---
 document.addEventListener('visibilitychange', () => {
     if (document.hidden && isRunning) {
-        finishTimer("Session failed. You left the app during focus time.");
+        stopTimerOnly();
+        setTimeout(() => {
+            alert("Session failed. You left the app during focus time.");
+        }, 50);
     }
 });
 
-// --- 共通終了処理 ---
-function finishTimer(message) {
+// --- 共通停止処理（画面とBGMを止めるだけ） ---
+function stopTimerOnly() {
     isRunning = false;
     clearInterval(timerInterval);
 
@@ -112,8 +132,4 @@ function finishTimer(message) {
     }
 
     overlay.classList.add('hidden');
-
-    setTimeout(() => {
-        alert(message);
-    }, 50);
 }
